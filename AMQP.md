@@ -50,7 +50,11 @@ AMQP的服务端称为Broker。
 
 # 二 AMQP 0-9-1 模型
 
-![image-20210323224359804](/Users/mocha/Library/Application Support/typora-user-images/image-20210323224359804.png)
+![image-20210323224359804](https://github.com/weizz5/KnowledgePoints/blob/master/markDownImages/AMQP%E6%A8%A1%E5%9E%8B.png)
+
+![Aaron Swartz](raw.githubusercontent.com/weizz5/KnowledgePoints/master/markDownImages/AMQP%E6%A8%A1%E5%9E%8B.png)
+
+
 
 1. 建立连接Connection。由producer和consumer创建连接，连接到broker的物理节点上。 
 
@@ -76,6 +80,34 @@ AMQP的服务端称为Broker。
 3、从安全角度考虑，网络是不可靠的，又或是消费者在处理消息的过程中意外挂掉，这样没有处理成功的消息就会丢失。基于此原因，AMQP 模块包含了一个消息确认（Message Acknowledgements）机制：当一个消息从队列中投递给消费者后，不会立即从队列中删除，直到它收到来自消费者的确认回执（Acknowledgement）后，才完全从队列中删除。
 
 4、在某些情况下，例如当一个消息无法被成功路由时（无法从交换机分发到队列），消息或许会被返回给发布者并被丢弃。或者，如果消息代理执行了延期操作，消息会被放入一个所谓的死信队列中。此时，消息发布者可以选择某些参数来处理这些特殊情况。
+
+
+
+# RabbitMQ就是AMQP协议的erlang实现
+
+AMQP的模型架构和RabbitMQ的模型架构是一样的，生产者将消息送给交换器，交换器和队列绑定。当生产者发送消息时所携带的RoutingKey与绑定时的BindingKey相匹配时，消息即被存入相应的队列之中，消费者可以订阅相应的队列来获取消息。
+
+当前各种应用大量使用异步消息模型，并随之产生众多消息中间件产品及协议，标准的不一致使应用与中间件之间的耦合限制产品的选择，并增加维护成本。AMQP是一个提供统一消息服务的应用层标准协议，基于此协议的客户端与消息中间件可传递消息，并不受客户端/中间件不同产品，不同开发语言等条件的限制。 
+
+​    当然这种降低耦合的机制是基于与上层产品，语言无关的协议。AMQP协议是一种二进制协议，提供客户端应用与消息中间件之间异步、安全、高效地交互。从整体来看，AMQP协议可划分为三层：
+
+![image-20210323233914158](/Users/mocha/Library/Application Support/typora-user-images/image-20210323233914158.png)
+
+
+
+
+
+AMQP协议本身包括三层：
+
+　　Module Layer：位于协议的最高层，主要定义了一些供客户端调用的命令，客户端可以利用这些命令实现自己的业务逻辑。例如：客户端可以使用Queue.Declare命令声明一个队列或者使用Basic.Consum订阅消费一个队列中的消息。
+
+　　Session Layer：位于中间层，主要负责将客户端的命令发送给服务器，再将服务器的应答返回给客户端，主要为客户端与服务器之间的通信提供可靠性同步机制和错误处理。
+
+　　Transport Layer：位于最底层，主要传输二进制数据流，提供帧的处理、信道复用、错误检测和数据表示等。
+
+AMQP说到底还是一个通信协议，通信协议都会涉及报文交互，从low-level层面举例来说，AMQP本身是应用层的协议，其填充于TCP协议层的数据部分，而从high-level层面来说，AMQP是通过协议命令交互的。AMQP协议可以看作是一系列结构化命令的集合，这里的命令代表一种操作，类似于Http中的方法（GET、POST、PUT、DELETE等）。
+
+
 
 ## exchange 与 Queue 的路由机制
 
